@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Halliday Payments Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Halliday Payments</h1>
+    <div class="actions">
+      <span id="count" class="count"></span>
+      <button id="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle light/dark theme">🌙</button>
+      <button id="refresh">Refresh</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="api-key-warning" class="warning" hidden>
+      <strong>Missing API key.</strong>
+      Go to <a href="https://dashboard.halliday.xyz/" target="_blank" rel="noopener noreferrer">https://dashboard.halliday.xyz/</a>
+      and copy your organization's <strong>SECRET Authentication Token (internal)</strong>.
+      Then open <code>script.js</code> and set <code>API_KEY</code> to <code>"Bearer &lt;your-secret-token&gt;"</code>.
+      <br />
+      <em>Keep this token safe — it is a secret key. Do not commit it to source control or share it.</em>
+    </div>
+    <div id="status" class="status"></div>
+    <div class="table-wrap">
+      <table id="payments">
+        <thead>
+          <tr>
+            <th>Created</th>
+            <th>Payment ID</th>
+            <th>Owner</th>
+            <th>Deposit Address</th>
+            <th>Status</th>
+            <th>Funded</th>
+            <th>Input</th>
+            <th>Output</th>
+            <th>Fees</th>
+            <th>JSON</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="load-more-wrap">
+      <button id="load-more">Load more</button>
+    </div>
+  </main>
+
+  <div id="json-modal" class="modal" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h2 id="modal-title">Payment JSON</h2>
+        <div class="modal-actions">
+          <button id="modal-copy" class="modal-btn">Copy</button>
+          <button id="modal-close" class="modal-btn modal-close" aria-label="Close">×</button>
+        </div>
+      </div>
+      <pre id="modal-body" class="modal-body"></pre>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
