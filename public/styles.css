@@ -119,6 +119,21 @@ header h1 {
   color: var(--text-muted);
 }
 
+#search {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 240px;
+  outline: none;
+}
+
+#search:focus {
+  border-color: var(--btn-primary-bg);
+}
+
 button {
   background: var(--btn-primary-bg);
   color: var(--btn-primary-text);

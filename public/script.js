@@ -13,6 +13,7 @@ const refreshBtn = document.getElementById("refresh");
 const loadMoreBtn = document.getElementById("load-more");
 const themeToggleBtn = document.getElementById("theme-toggle");
 const apiKeyWarning = document.getElementById("api-key-warning");
+const searchEl = document.getElementById("search");
 
 function isApiKeyMissing(key) {
   if (!key) return true;
@@ -64,6 +65,28 @@ let nextPaginationKey = null;
 let isLoading = false;
 let lastFetchTime = 0;
 let hasMore = true;
+
+let currentQuery = "";
+const jsonBlobCache = new Map();
+
+function getJsonBlob(p) {
+  let blob = jsonBlobCache.get(p.payment_id);
+  if (blob == null) {
+    blob = JSON.stringify(p).toLowerCase();
+    jsonBlobCache.set(p.payment_id, blob);
+  }
+  return blob;
+}
+
+function getFilteredPayments() {
+  if (!currentQuery) return allPayments;
+  return allPayments.filter((p) => getJsonBlob(p).includes(currentQuery));
+}
+
+searchEl.addEventListener("input", () => {
+  currentQuery = searchEl.value.trim().toLowerCase();
+  render(getFilteredPayments());
+});
 
 refreshBtn.addEventListener("click", () => load({ reset: true }));
 loadMoreBtn.addEventListener("click", () => load({ reset: false }));
@@ -238,9 +261,16 @@ function escapeHtml(str) {
 
 function render(payments) {
   tbody.innerHTML = "";
+  const total = allPayments.length;
+  const filtered = currentQuery ? payments.length : total;
   if (!payments.length) {
-    tbody.innerHTML = `<tr><td colspan="10" class="muted" style="text-align:center;padding:24px;">No payments found.</td></tr>`;
-    countEl.textContent = "0 payments, load more at the bottom";
+    const msg = currentQuery
+      ? `No matches for "${escapeHtml(currentQuery)}" in ${total} loaded payment${total === 1 ? "" : "s"}.`
+      : "No payments found.";
+    tbody.innerHTML = `<tr><td colspan="10" class="muted" style="text-align:center;padding:24px;">${msg}</td></tr>`;
+    countEl.textContent = currentQuery
+      ? `0 of ${total} match`
+      : "0 payments, load more at the bottom";
     return;
   }
 
@@ -268,7 +298,9 @@ function render(payments) {
   });
 
   tbody.innerHTML = rows.join("");
-  countEl.textContent = `${payments.length} payment${payments.length === 1 ? "" : "s"}` + ", load more at the bottom";
+  countEl.textContent = currentQuery
+    ? `${filtered} of ${total} match`
+    : `${total} payment${total === 1 ? "" : "s"}, load more at the bottom`;
 }
 
 async function load({ reset } = { reset: true }) {
@@ -279,6 +311,7 @@ async function load({ reset } = { reset: true }) {
   if (reset) {
     allPayments = [];
     paymentsById.clear();
+    jsonBlobCache.clear();
     nextPaginationKey = null;
     hasMore = true;
   }
@@ -302,7 +335,7 @@ async function load({ reset } = { reset: true }) {
     }
 
     allPayments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    render(allPayments);
+    render(getFilteredPayments());
     statusEl.textContent = hasMore ? "" : "End of results.";
   } catch (err) {
     console.error(err);
